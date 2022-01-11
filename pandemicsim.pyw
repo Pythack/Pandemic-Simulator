@@ -26,17 +26,36 @@ def hasToGoPurple(age):
                   prob = v
                   break
       if prob == 0:
-            prob = 0.487
+            prob = 0.487 
       return proba(prob)
             
-            
-
 class entity:
   def __init__(self, state, masked, age):
     self.state = state
-    self.masked = bool(masked)
     self.age = age
     self.transmitted = R
+
+  def has_bad_health(self):
+    '''
+    This function generate a number between 1 and 100 and return True if the number is inferior or equal to 10 and False otherwise.
+    The entity have 10% chance to have a bad health.
+    '''
+    proba = random.randint(0, 100)
+    if proba <= 10: 
+      return True
+    else:
+      return False
+    
+  def is_vaccinated(self):
+    '''
+    This function generate a number between 1 and 100 and return False if the number is inferior or equal to 40 and True otherwise.
+    The entity have 60% chance of being vaccinated. 
+    '''
+    proba = random.randint(0, 100)
+    if proba <= 40:
+      return False
+    else:
+      return True
 
 class grid:
   def __init__(self, x, y, nClusters):
@@ -130,7 +149,7 @@ if __name__ == "__main__":
 
     display = pygame.display.set_mode((dispw, disph))
     pygame.display.set_caption('Pandemic simulator')
-    icon = pygame.image.load('C:/Users/noefa\Documents/pandemicsim/images/icon.png')
+    icon = pygame.image.load('images/icon.png') # rectified the path (previous was C:users/noefa/... so it would only load the file on your computer @pythack)
     pygame.display.set_icon(icon)
     clock = pygame.time.Clock()
     pygame.font.init()
@@ -153,7 +172,7 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
-        writeText("Contaminated: {}".format(newGrid.contaminated), (255, 255, 255), (0, disph-100))
-        writeText("Contaminations: {}".format(newGrid.contaminations), (255, 255, 255), (0, disph-50))
+        writeText("Contaminated: {}".format(newGrid.contaminated), (0,128,0), (1, disph-55)) 
+        writeText("Contaminations: {}".format(newGrid.contaminations), (0,128,0), (0, disph-30))
         pygame.display.update()
         clock.tick(30)
