@@ -90,30 +90,30 @@ class grid:
     ng = copy.deepcopy(self.grid)
     for y in range(len(self.grid)):
       for x in range(len(self.grid[y])):
+        element = self.grid[y][x]
+        if element.state == 2:
+            continue
         neibh = self.get_neibhors(x, y)
         alives = 0
         sicks = 0
         deads = 0
         for i in neibh:
           if i[0].state == 2:
-            alives += 1
+                alives += 1
           elif i[0].state == 1:
-            sicks += 1
+                sicks += 1
           else:
-            deads += 1
-          element = self.grid[y][x]
-          if element.state == 2:
-            pass
-          elif element.state == 1:
+                deads += 1
+          if element.state == 1:
             if not element.transmitted:
               for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
                 if proba(R/8):
-                  ng[ny][nx] = entity(1, element.masked, element.age)
+                  ng[ny][nx].state = 1
                   break
             if hasToGoPurple(element.age):
-              ng[y][x] = entity(0, element.masked, element.age)
+              ng[y][x].state = 0
             elif random.randint(1, 2) == 1:
-              ng[y][x] = entity(2, element.masked, element.age)
+              ng[y][x].state = 2
           else:
             if random.randint(1, 2) == 1:
                   pass
@@ -137,9 +137,9 @@ def writeText(text, color, pos, highlighted):
 if __name__ == "__main__":
     R = 1.09
     pygame.init()
-    newGrid = grid(100, 100, 1)
-    dispw = newGrid.width * 10
-    disph = newGrid.height * 10
+    newGrid = grid(500, 500, 1)
+    dispw = newGrid.width * 1
+    disph = newGrid.height * 1
 
     display = pygame.display.set_mode((dispw, disph))
     pygame.display.set_caption('Pandemic simulator')
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                           color = (0, 0, 255)
                     else:
                           color = (255, 0, 255)
-                    tile = pygame.Rect((x)*10, (y)*10, 10, 10)
+                    tile = pygame.Rect((x)*1, (y)*1, 1, 1)
                     pygame.draw.rect(display, color, tile)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
