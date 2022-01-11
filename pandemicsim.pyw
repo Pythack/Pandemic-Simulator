@@ -2,12 +2,37 @@ import random
 import copy
 import os
 import pygame
+import numpy
+
+def proba(prob):
+      return bool(numpy.random.choice(numpy.arange(0, 2), p=[1-prob, prob]))
+
+def hasToGoPurple(age):
+      probas = {
+        17: 0.006,
+        44: 0.39,
+        64: 0.224,
+        74: 0.249
+      }
+      prob = 0
+      for k, v in probas.items():
+            if age > k:
+                  continue
+            else:
+                  prob = v
+                  break
+      if prob == 0:
+            prob = 0.487
+      return proba(prob)
+            
+            
 
 class entity:
   def __init__(self, state, masked, age):
     self.state = state
     self.masked = bool(masked)
     self.age = age
+    self.transmitted = False
 
 class grid:
   def __init__(self, x, y, nClusters):
@@ -39,7 +64,7 @@ class grid:
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
-      self.grid[randposy][randposx] = entity(1, random.randint(0, 1), random.randint(15, 30))
+      self.grid[randposy][randposx] = entity(1, random.randint(0, 1), random.randint(1, 80))
   def print(self):
     for y in self.grid:
       for x in y:
@@ -59,7 +84,7 @@ class grid:
                 continue
             if nx < 0 or nx >= len(g[0]) or ny < 0 or ny >= len(g):
                 continue
-            n.append(g[ny][nx])
+            n.append((g[ny][nx], nx, ny))
     return n
   def update(self, R):
     ng = copy.deepcopy(self.grid)
@@ -70,28 +95,29 @@ class grid:
         sicks = 0
         deads = 0
         for i in neibh:
-          if i.state == 2:
+          if i[0].state == 2:
             alives += 1
-          elif i.state == 1:
+          elif i[0].state == 1:
             sicks += 1
           else:
             deads += 1
           element = self.grid[y][x]
           if element.state == 2:
-            if element.masked:
-              if random.randint(1, 25) <= sicks:
-                ng[y][x] = entity(1, element.masked, element.age)
-            else:
-                if random.randint(1, 10) <= sicks:
-                   ng[y][x] = entity(1, element.masked, element.age)
+            pass
           elif element.state == 1:
-            if random.randint(15, 80) < element.age:
+            if not element.transmitted:
+              for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
+                if proba(R/8):
+                  ng[ny][nx] = entity(1, element.masked, element.age)
+                  break
+            if hasToGoPurple(element.age):
               ng[y][x] = entity(0, element.masked, element.age)
             elif random.randint(1, 2) == 1:
               ng[y][x] = entity(2, element.masked, element.age)
           else:
             if random.randint(1, 2) == 1:
-              ng[y][x] = entity(2, element.masked, element.age)
+                  pass
+              #ng[y][x] = entity(2, element.masked, element.age)
               
     self.grid = copy.deepcopy(ng)
             
@@ -111,13 +137,13 @@ def writeText(text, color, pos, highlighted):
 if __name__ == "__main__":
     R = 1.09
     pygame.init()
-    newGrid = grid(100, 100, 10)
+    newGrid = grid(100, 100, 1)
     dispw = newGrid.width * 10
     disph = newGrid.height * 10
 
     display = pygame.display.set_mode((dispw, disph))
     pygame.display.set_caption('Pandemic simulator')
-    icon = pygame.image.load('C:/Users/noefa\Documents/Python lycée/liste2d/images/icon.png')
+    icon = pygame.image.load('C:/Users/noefa\Documents/pandemicsim/images/icon.png')
     pygame.display.set_icon(icon)
     clock = pygame.time.Clock()
     pygame.font.init()
