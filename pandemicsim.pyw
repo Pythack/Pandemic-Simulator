@@ -26,13 +26,14 @@ def hasToGoPurple(age):
                   prob = v
                   break
       if prob == 0:
-            prob = 0.487 
+            prob = 0.487
       return proba(prob)
             
 class entity:
   def __init__(self, state, masked, age):
     self.state = state
     self.age = age
+    self.masked = bool(masked)
     self.transmitted = R
 
   def has_bad_health(self):
@@ -149,7 +150,7 @@ if __name__ == "__main__":
 
     display = pygame.display.set_mode((dispw, disph))
     pygame.display.set_caption('Pandemic simulator')
-    icon = pygame.image.load('images/icon.png') # rectified the path (previous was C:users/noefa/... so it would only load the file on your computer @pythack)
+    icon = pygame.image.load('images/icon.png')
     pygame.display.set_icon(icon)
     clock = pygame.time.Clock()
     pygame.font.init()
@@ -172,7 +173,7 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
-        writeText("Contaminated: {}".format(newGrid.contaminated), (0,128,0), (1, disph-55)) 
+        writeText("Contaminated: {}".format(newGrid.contaminated), (0,128,0), (0, disph-55)) 
         writeText("Contaminations: {}".format(newGrid.contaminations), (0,128,0), (0, disph-30))
         pygame.display.update()
         clock.tick(30)
