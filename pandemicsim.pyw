@@ -37,6 +37,17 @@ class entity:
     self.transmitted = R
     self.hasBadHealth = hasBadHealth
     self.isVaccinated = isVaccinated
+    
+    proba = random.randint(0, 100)
+    if proba <= 10:
+        self.hasBadHealth = True
+        self.isVaccinated = False
+    elif proba <= 40 and proba > 10:
+        self.hasBadHealth = False
+        self.isVaccinated = False
+    elif proba > 40:
+        self.hasBadHealth = False
+        self.isVaccinated = True
 
 class grid:
   def __init__(self, x, y, nClusters):
