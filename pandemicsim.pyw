@@ -30,37 +30,17 @@ def hasToGoPurple(age):
       return proba(prob)
             
 class entity:
-  def __init__(self, state, masked, age):
+  def __init__(self, state, masked, age, hasBadHealth, isVaccinated):
     self.state = state
     self.age = age
     self.masked = bool(masked)
     self.transmitted = R
-
-  def has_bad_health(self):
-    '''
-    This function generate a number between 1 and 100 and return True if the number is inferior or equal to 10 and False otherwise.
-    The entity have 10% chance to have a bad health.
-    '''
-    proba = random.randint(0, 100)
-    if proba <= 10: 
-      return True
-    else:
-      return False
-    
-  def is_vaccinated(self):
-    '''
-    This function generate a number between 1 and 100 and return False if the number is inferior or equal to 40 and True otherwise.
-    The entity have 60% chance of being vaccinated. 
-    '''
-    proba = random.randint(0, 100)
-    if proba <= 40:
-      return False
-    else:
-      return True
+    self.hasBadHealth = hasBadHealth
+    self.isVaccinated = isVaccinated
 
 class grid:
   def __init__(self, x, y, nClusters):
-    self.grid = [[entity(2, 0, random.randint(1, 80)) for i in range(x)] for j in range(y)]
+    self.grid = [[entity(2, 0, random.randint(1, 80), proba(0.05), proba(0.9)) for i in range(x)] for j in range(y)]
     #self.grid = [
     #  [entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30))],
     #  [entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30))],
@@ -90,7 +70,7 @@ class grid:
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
-      self.grid[randposy][randposx] = entity(1, random.randint(0, 1), random.randint(1, 80))
+      self.grid[randposy][randposx] = entity(1, random.randint(0, 1), random.randint(1, 80), proba(0.05), proba(0.9))
   def get_neibhors(self, x, y):
     g = self.grid
     n = []
