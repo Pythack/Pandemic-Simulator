@@ -7,6 +7,17 @@ import threading
 
 R = 2
 
+maskTransmissionProbas = {
+  "True": {
+    "True": 0.05,
+    "False": 0.11
+  },
+  "False": {
+    "True": 0.7,
+    "False": 1
+  }
+}
+
 def proba(prob):
       if prob > 1:
             prob = 1
@@ -35,8 +46,8 @@ class entity:
     self.state = state
     self.age = age
     self.masked = bool(masked)
-    self.hasBadHealth = hasBadHealth
-    self.isVaccinated = isVaccinated
+    self.hasBadHealth = bool(hasBadHealth)
+    self.isVaccinated = bool(isVaccinated)
 
 def updateRow(self, ng, y):
       for x in range(len(self.grid[y])):
@@ -46,7 +57,7 @@ def updateRow(self, ng, y):
           neibh, alives = self.get_neibhors(x, y)
           if element.state == 1:
             for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
-              if proba(R/alives):
+              if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
                 ng[ny][nx].state = 1
                 self.contaminated += 1
                 self.contaminations += 1
@@ -59,7 +70,7 @@ def updateRow(self, ng, y):
 
 class grid:
   def __init__(self, x, y, nClusters):
-    self.grid = [[entity(2, 0, random.randint(1, 80), proba(0.05), proba(0.9)) for i in range(x)] for j in range(y)]
+    self.grid = [[entity(2, proba(0.8), random.randint(1, 80), proba(0.05), proba(0.9)) for i in range(x)] for j in range(y)]
     #self.grid = [
     #  [entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30))],
     #  [entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30)), entity(2, random.randint(0, 1), random.randint(15, 30))],
