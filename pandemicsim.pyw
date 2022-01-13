@@ -35,7 +35,6 @@ class entity:
     self.state = state
     self.age = age
     self.masked = bool(masked)
-    self.transmitted = R
     self.hasBadHealth = hasBadHealth
     self.isVaccinated = isVaccinated
 
@@ -46,21 +45,17 @@ def updateRow(self, ng, y):
               continue
           neibh, alives = self.get_neibhors(x, y)
           if element.state == 1:
-            if element.transmitted > 0:
-              for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
-                if proba(R/alives):
-                  ng[ny][nx].state = 1
-                  ng[y][x].transmitted -= 1
-                  self.contaminated += 1
-                  self.contaminations += 1
-                  if ng[y][x].transmitted < 0:
-                        break
-            if hasToGoPurple(element.age):
-              ng[y][x].state = 0
-              self.contaminated -= 1
-            elif proba(0.5):
-              ng[y][x].state = 2
-              self.contaminated -= 1
+            for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
+              if proba(R/alives):
+                ng[ny][nx].state = 1
+                self.contaminated += 1
+                self.contaminations += 1
+          if hasToGoPurple(element.age):
+            ng[y][x].state = 0
+            self.contaminated -= 1
+          elif proba(0.5):
+            ng[y][x].state = 2
+            self.contaminated -= 1
 
 class grid:
   def __init__(self, x, y, nClusters):
