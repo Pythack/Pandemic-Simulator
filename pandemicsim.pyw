@@ -48,8 +48,10 @@ class entity:
     self.masked = bool(masked)
     self.hasBadHealth = bool(hasBadHealth)
     self.isVaccinated = bool(isVaccinated)
+    self.contaminated = 0
 
 def updateRow(self, ng, y):
+      localR = (0, 0)
       for x in range(len(self.grid[y])):
           element = self.grid[y][x]
           if element.state == 2 or element.state == 0:
@@ -59,6 +61,7 @@ def updateRow(self, ng, y):
             for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
               if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
                 ng[ny][nx].state = 1
+                ng[y][x].contaminated += 1
                 self.contaminated += 1
                 self.contaminations += 1
           if hasToGoPurple(element.age):
@@ -67,6 +70,8 @@ def updateRow(self, ng, y):
           elif proba(0.5):
             ng[y][x].state = 2
             self.contaminated -= 1
+          localR = ((localR[0]*localR[1]+ng[y][x].contaminated)/(localR[1]+1), localR[1]+1)
+      self.localRs.append(localR)
 
 class grid:
   def __init__(self, x, y, nClusters):
@@ -95,8 +100,10 @@ class grid:
     #]
     self.width = x
     self.height = y
-    self.contaminated = 0
+    self.contaminated = nClusters
     self.contaminations = 0
+    self.R = (0, 0)
+    self.localRs = []
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
@@ -115,12 +122,19 @@ class grid:
             if g[ny][nx].state == 2:
                   alives += 1
     return n, alives
-  def update(self, R):
+  def update(self):
     ng = copy.deepcopy(self.grid)
+    self.localRs = []
     for y in range(len(self.grid)):
         threading.Thread(target=updateRow, args=[self, ng, y]).start()
               
     self.grid = copy.deepcopy(ng)
+    self.R = (0, 0)
+    for rate in self.localRs:
+        try:
+          self.R = ((self.R[0]*self.R[1]+rate[0]*rate[1])/(self.R[1]+rate[1]), self.R[1]+rate[1])
+        except ZeroDivisionError:
+          continue
             
 
 def writeText(text, color, pos, highlighted = False):
@@ -131,12 +145,37 @@ def writeText(text, color, pos, highlighted = False):
     pygame.draw.rect(dis, (75, 75, 75), textRect)
   display.blit(textsurface, textRect)
 
+def mainloop(gridw, gridh):
+  population = grid(gridw, gridh, 20)
+  tempContaminated = population.contaminated
+  while True:
+    display.fill((0, 0, 0))
+    for y in range(population.height):
+          for x in range(population.width):
+                if population.grid[y][x].state == 2:
+                      continue
+                elif population.grid[y][x].state == 1:
+                      color = (0, 0, 255)
+                else:
+                      color = (255, 0, 255)
+                tile = pygame.Rect((x)*1, (y)*1, 1, 1)
+                pygame.draw.rect(display, color, tile)
+    
+    writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100)) 
+    writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
+    writeText("Reproduction rate: {}".format(population.R[0]), (0,128,0), (0, disph-50))
+    tempContaminated = population.contaminated
+    pygame.display.update()
+    clock.tick(30)
+    population.update()
+
+
 if __name__ == "__main__":
     pygame.init()
-    newGrid = grid(500, 500, 20)
-    newGrid.sicks = 20
-    dispw = newGrid.width * 1
-    disph = newGrid.height * 1 + 100
+    gridw = 500
+    gridh = 500
+    dispw = gridw * 1
+    disph = gridh * 1 + 100
 
     display = pygame.display.set_mode((dispw, disph))
     pygame.display.set_caption('Pandemic simulator')
@@ -145,25 +184,11 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     pygame.font.init()
     myfont = pygame.font.SysFont('Times New Roman', 30)
+    writeText("Generating population...", (0,128,0), (0, 0)) 
+    pygame.display.update()
+    threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True).start()
     game_over = False
     while not game_over:
-        moved = False
-        newGrid.update(R)
-        display.fill((0, 0, 0))
-        for y in range(newGrid.height):
-              for x in range(newGrid.width):
-                    if newGrid.grid[y][x].state == 2:
-                          continue
-                    elif newGrid.grid[y][x].state == 1:
-                          color = (0, 0, 255)
-                    else:
-                          color = (255, 0, 255)
-                    tile = pygame.Rect((x)*1, (y)*1, 1, 1)
-                    pygame.draw.rect(display, color, tile)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
-        writeText("Contaminated: {}".format(newGrid.contaminated), (0,128,0), (0, disph-55)) 
-        writeText("Contaminations: {}".format(newGrid.contaminations), (0,128,0), (0, disph-30))
-        pygame.display.update()
-        clock.tick(30)
