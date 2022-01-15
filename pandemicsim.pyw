@@ -107,7 +107,7 @@ class grid:
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
-      self.grid[randposy][randposx] = entity(1, random.randint(0, 1), random.randint(1, 80), proba(0.05), proba(0.9))
+      self.grid[randposy][randposx] = entity(1, proba(0.8), random.randint(1, 80), proba(0.05), proba(0.9))
   def get_neibhors(self, x, y):
     g = self.grid
     n = []
@@ -147,7 +147,6 @@ def writeText(text, color, pos, highlighted = False):
 
 def mainloop(gridw, gridh):
   population = grid(gridw, gridh, 20)
-  tempContaminated = population.contaminated
   while True:
     display.fill((0, 0, 0))
     for y in range(population.height):
@@ -163,8 +162,7 @@ def mainloop(gridw, gridh):
     
     writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100)) 
     writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
-    writeText("Reproduction rate: {}".format(population.R[0]), (0,128,0), (0, disph-50))
-    tempContaminated = population.contaminated
+    writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-50))
     pygame.display.update()
     clock.tick(30)
     population.update()
@@ -184,9 +182,11 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     pygame.font.init()
     myfont = pygame.font.SysFont('Times New Roman', 30)
-    writeText("Generating population...", (0,128,0), (0, 0)) 
+    writeText("Generating population...", (0,128,0), (0, 0))
+    writeText("Please wait", (0,128,0), (0, 30))
     pygame.display.update()
-    threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True).start()
+    mainProccess = threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True)
+    mainProcess.start()
     game_over = False
     while not game_over:
         for event in pygame.event.get():
