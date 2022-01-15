@@ -185,7 +185,7 @@ if __name__ == "__main__":
     writeText("Generating population...", (0,128,0), (0, 0))
     writeText("Please wait", (0,128,0), (0, 30))
     pygame.display.update()
-    mainProccess = threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True)
+    mainProcess = threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True)
     mainProcess.start()
     game_over = False
     while not game_over:
