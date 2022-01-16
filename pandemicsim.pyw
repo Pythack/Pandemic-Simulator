@@ -66,6 +66,7 @@ def updateRow(self, ng, y):
                 self.contaminations += 1
           if hasToGoPurple(element.age):
             ng[y][x].state = 0
+            self.deaths += 1
             self.contaminated -= 1
           elif proba(0.5):
             ng[y][x].state = 2
@@ -102,6 +103,7 @@ class grid:
     self.height = y
     self.contaminated = nClusters
     self.contaminations = 0
+    self.deaths = 0
     self.R = (0, 0)
     self.localRs = []
     for i in range(nClusters):
@@ -145,25 +147,39 @@ def writeText(text, color, pos, highlighted = False):
     pygame.draw.rect(dis, (75, 75, 75), textRect)
   display.blit(textsurface, textRect)
 
-def dashboardManager(population, setup):
-      
-
-def mainloop(gridw, gridh):
-  population = grid(gridw, gridh, 20)
-  while True:
+def displayManager(population, settings):
+  game_over = False
+  dashboardId = 0
+  while not game_over:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        game_over = True
     display.fill((0, 0, 0))
     for y in range(population.height):
-          for x in range(population.width):
-                if population.grid[y][x].state == 2:
-                      continue
-                elif population.grid[y][x].state == 1:
-                      color = (0, 0, 255)
-                else:
-                      color = (255, 0, 255)
-                tile = pygame.Rect((x)*1, (y)*1, 1, 1)
-                pygame.draw.rect(display, color, tile)
+      for x in range(population.width):
+        if population.grid[y][x].state == 2:
+          continue
+        elif population.grid[y][x].state == 1:
+          color = (0, 0, 255)
+        else:
+          color = (255, 0, 255)
+        tile = pygame.Rect((x)*1, (y)*1, 1, 1)
+        pygame.draw.rect(display, color, tile)
+    if settings["dashboardId"] == 0:
+      writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100))
+      writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
+      writeText("Deaths: {}".format(population.deaths), (0,128,0), (0, disph-50))
+    elif settings["dashboardId"] == 1:
+      writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-100))
     pygame.display.update()
     clock.tick(30)
+                    
+      
+
+def mainloop(gridw, gridh, settings):
+  population = grid(gridw, gridh, 20)
+  threading.Thread(target=displayManager, args=[population, settings]).start()
+  while True:
     population.update()
 
 
@@ -184,7 +200,8 @@ if __name__ == "__main__":
     writeText("Generating population...", (0,128,0), (0, 0))
     writeText("Please wait", (0,128,0), (0, 30))
     pygame.display.update()
-    mainProcess = threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True)
+    settings = {"dashboardId": 0}
+    mainProcess = threading.Thread(target=mainloop, args=[gridw, gridh, settings], daemon=True)
     mainProcess.start()
     game_over = False
     dashboard = pygame.Rect(0, gridh, dispw, 100)
@@ -192,9 +209,8 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
-        display.fill((0, 0, 0))
-        writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100)) 
-        writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
-        writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-50))
-        pygame.display.update(dashboard)
-        clock.tick(30)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    settings["dashboardId"] = 1
+                elif event.key == pygame.K_LEFT:
+                    settings["dashboardId"] = 0
