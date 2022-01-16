@@ -137,6 +137,13 @@ class grid:
           self.R = ((self.R[0]*self.R[1]+rate[0]*rate[1])/(self.R[1]+rate[1]), self.R[1]+rate[1])
         except ZeroDivisionError:
           continue
+
+class stats:
+  def __init__(self, contaminated, contaminations, deaths, R):
+    self.contaminated = contaminated
+    self.contaminations = contaminations
+    self.deaths = deaths
+    self.R = R
             
 
 def writeText(text, color, pos, highlighted = False):
@@ -148,12 +155,8 @@ def writeText(text, color, pos, highlighted = False):
   display.blit(textsurface, textRect)
 
 def displayManager(population, settings):
-  game_over = False
   dashboardId = 0
-  while not game_over:
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        game_over = True
+  while True:
     display.fill((0, 0, 0))
     for y in range(population.height):
       for x in range(population.width):
@@ -166,11 +169,11 @@ def displayManager(population, settings):
         tile = pygame.Rect((x)*1, (y)*1, 1, 1)
         pygame.draw.rect(display, color, tile)
     if settings["dashboardId"] == 0:
-      writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100))
-      writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
-      writeText("Deaths: {}".format(population.deaths), (0,128,0), (0, disph-50))
+      writeText("Contaminated: {}".format(settings["stats"].contaminated), (0,128,0), (0, disph-100))
+      writeText("Contaminations: {}".format(settings["stats"].contaminations), (0,128,0), (0, disph-75))
+      writeText("Deaths: {}".format(settings["stats"].deaths), (0,128,0), (0, disph-50))
     elif settings["dashboardId"] == 1:
-      writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-100))
+      writeText("Reproduction rate: {}".format(round(settings["stats"].R[0], 2)), (0,128,0), (0, disph-100))
     pygame.display.update()
     clock.tick(30)
                     
@@ -178,9 +181,11 @@ def displayManager(population, settings):
 
 def mainloop(gridw, gridh, settings):
   population = grid(gridw, gridh, 20)
-  threading.Thread(target=displayManager, args=[population, settings]).start()
+  settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R)
+  threading.Thread(target=displayManager, args=[population, settings], daemon=True).start()
   while True:
     population.update()
+    settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R)
 
 
 if __name__ == "__main__":
