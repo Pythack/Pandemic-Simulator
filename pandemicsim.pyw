@@ -176,7 +176,6 @@ def displayManager(population, settings):
       writeText("Reproduction rate: {}".format(round(settings["stats"].R[0], 2)), (0,128,0), (0, disph-100))
     pygame.display.update()
     clock.tick(30)
-                    
       
 
 def mainloop(gridw, gridh, settings):
