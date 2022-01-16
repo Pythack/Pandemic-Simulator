@@ -128,7 +128,7 @@ class grid:
     ng = copy.deepcopy(self.grid)
     self.localRs = []
     for y in range(len(self.grid)):
-        threading.Thread(target=updateRow, args=[self, ng, y]).start()
+        threading.Thread(target=updateRow, args=[self, ng, y], daemon=True).start()
               
     self.grid = copy.deepcopy(ng)
     self.R = (0, 0)
@@ -139,15 +139,16 @@ class grid:
           continue
 
 class stats:
-  def __init__(self, contaminated, contaminations, deaths, R):
+  def __init__(self, contaminated, contaminations, deaths, R, day):
     self.contaminated = contaminated
     self.contaminations = contaminations
     self.deaths = deaths
     self.R = R
+    self.day = day
             
 
-def writeText(text, color, pos, highlighted = False):
-  textsurface = myfont.render(text, False, color)
+def writeText(text, font, color, pos, highlighted = False):
+  textsurface = font.render(text, False, color)
   textRect = textsurface.get_rect()
   textRect.topleft = (pos)
   if highlighted:
@@ -169,22 +170,25 @@ def displayManager(population, settings):
         tile = pygame.Rect((x)*1, (y)*1, 1, 1)
         pygame.draw.rect(display, color, tile)
     if settings["dashboardId"] == 0:
-      writeText("Contaminated: {}".format(settings["stats"].contaminated), (0,128,0), (0, disph-100))
-      writeText("Contaminations: {}".format(settings["stats"].contaminations), (0,128,0), (0, disph-75))
-      writeText("Deaths: {}".format(settings["stats"].deaths), (0,128,0), (0, disph-50))
+      writeText("Contaminated: {}".format(settings["stats"].contaminated), dashboardFont, (0,128,0), (0, disph-100))
+      writeText("Deaths: {}".format(settings["stats"].deaths), dashboardFont, (0,128,0), (0, disph-80))
+      writeText("Day: {}".format(settings["stats"].day), dashboardFont, (0,128,0), (0, disph-60))
     elif settings["dashboardId"] == 1:
-      writeText("Reproduction rate: {}".format(round(settings["stats"].R[0], 2)), (0,128,0), (0, disph-100))
+      writeText("Reproduction rate: {}".format(round(settings["stats"].R[0], 2)), dashboardFont, (0,128,0), (0, disph-100))
+      writeText("Contaminations: {}".format(settings["stats"].contaminations), dashboardFont, (0,128,0), (0, disph-80))
     pygame.display.update()
     clock.tick(30)
       
 
 def mainloop(gridw, gridh, settings):
   population = grid(gridw, gridh, 20)
-  settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R)
+  day = 1
+  settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
   threading.Thread(target=displayManager, args=[population, settings], daemon=True).start()
   while True:
     population.update()
-    settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R)
+    day += 1
+    settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
 
 
 if __name__ == "__main__":
@@ -201,9 +205,10 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     pygame.font.init()
     myfont = pygame.font.SysFont('Times New Roman', 30)
-    writeText("Generating population...", (0,128,0), (0, 0))
-    writeText("Please wait", (0,128,0), (0, 30))
+    writeText("Generating population...", myfont, (0,128,0), (0, 0))
+    writeText("Please wait", myfont, (0,128,0), (0, 30))
     pygame.display.update()
+    dashboardFont = pygame.font.SysFont('Times New Roman', 20)
     settings = {"dashboardId": 0}
     mainProcess = threading.Thread(target=mainloop, args=[gridw, gridh, settings], daemon=True)
     mainProcess.start()
