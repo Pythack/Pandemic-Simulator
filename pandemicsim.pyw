@@ -145,6 +145,9 @@ def writeText(text, color, pos, highlighted = False):
     pygame.draw.rect(dis, (75, 75, 75), textRect)
   display.blit(textsurface, textRect)
 
+def dashboardManager(population, setup):
+      
+
 def mainloop(gridw, gridh):
   population = grid(gridw, gridh, 20)
   while True:
@@ -159,10 +162,6 @@ def mainloop(gridw, gridh):
                       color = (255, 0, 255)
                 tile = pygame.Rect((x)*1, (y)*1, 1, 1)
                 pygame.draw.rect(display, color, tile)
-    
-    writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100)) 
-    writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
-    writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-50))
     pygame.display.update()
     clock.tick(30)
     population.update()
@@ -188,7 +187,14 @@ if __name__ == "__main__":
     mainProcess = threading.Thread(target=mainloop, args=[gridw, gridh], daemon=True)
     mainProcess.start()
     game_over = False
+    dashboard = pygame.Rect(0, gridh, dispw, 100)
     while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+        display.fill((0, 0, 0))
+        writeText("Contaminated: {}".format(population.contaminated), (0,128,0), (0, disph-100)) 
+        writeText("Contaminations: {}".format(population.contaminations), (0,128,0), (0, disph-75))
+        writeText("Reproduction rate: {}".format(round(population.R[0], 2)), (0,128,0), (0, disph-50))
+        pygame.display.update(dashboard)
+        clock.tick(30)
