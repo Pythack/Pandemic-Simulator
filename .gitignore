@@ -1,3 +1,5 @@
 /build\pandemicsim/
 /dist/
 /__pycache__/
+build/
+pandemicsim.spec
