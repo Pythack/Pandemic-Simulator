@@ -98,7 +98,7 @@ def updateLoc(self, ng, y):
         self.contaminated -= 1
         self.contaLoc.pop((x, y))
       localR = ((localR[0]*localR[1]+ng[y][x].contaminated)/(localR[1]+1), localR[1]+1)
-  self.localRs.append(localR)
+      self.localRs.append(localR)
 
 class grid:
   def __init__(self, x, y, nClusters):
