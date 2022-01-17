@@ -50,29 +50,55 @@ class entity:
     self.isVaccinated = bool(isVaccinated)
     self.contaminated = 0
 
-def updateRow(self, ng, y):
+#def updateRow(self, ng, y):
+#      localR = (0, 0)
+#      for x in range(len(self.grid[y])):
+#          element = self.grid[y][x]
+#          if element.state == 2 or element.state == 0:
+#              continue
+#          neibh, alives = self.get_neibhors(x, y)
+#          if element.state == 1:
+#            for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
+#              if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
+#                ng[ny][nx].state = 1
+#                ng[y][x].contaminated += 1
+#                self.contaminated += 1
+#                self.contaminations += 1
+#                self.contaLoc.append((x, y))
+#          if hasToGoPurple(element.age):
+#            ng[y][x].state = 0
+#            self.deaths += 1
+#            self.contaminated -= 1
+#            self.contaLoc.pop((x, y))
+#          elif proba(0.5):
+#            ng[y][x].state = 2
+#            self.contaminated -= 1
+#            self.contaLoc.pop((x, y))
+#          localR = ((localR[0]*localR[1]+ng[y][x].contaminated)/(localR[1]+1), localR[1]+1)
+#      self.localRs.append(localR)
+      
+def updateLoc(self, ng, y):
       localR = (0, 0)
-      for x in range(len(self.grid[y])):
-          element = self.grid[y][x]
-          if element.state == 2 or element.state == 0:
-              continue
-          neibh, alives = self.get_neibhors(x, y)
-          if element.state == 1:
-            for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
-              if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
-                ng[ny][nx].state = 1
-                ng[y][x].contaminated += 1
-                self.contaminated += 1
-                self.contaminations += 1
-          if hasToGoPurple(element.age):
-            ng[y][x].state = 0
-            self.deaths += 1
-            self.contaminated -= 1
-          elif proba(0.5):
-            ng[y][x].state = 2
-            self.contaminated -= 1
-          localR = ((localR[0]*localR[1]+ng[y][x].contaminated)/(localR[1]+1), localR[1]+1)
-      self.localRs.append(localR)
+      element = self.grid[y][x]
+      neibh, alives = self.get_neibhors(x, y)
+      for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
+        if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
+          ng[ny][nx].state = 1
+          ng[y][x].contaminated += 1
+          self.contaminated += 1
+          self.contaminations += 1
+          self.contaLoc.append((x, y))
+      if hasToGoPurple(element.age):
+        ng[y][x].state = 0
+        self.deaths += 1
+        self.contaminated -= 1
+        self.contaLoc.pop((x, y))
+      elif proba(0.5):
+        ng[y][x].state = 2
+        self.contaminated -= 1
+        self.contaLoc.pop((x, y))
+      localR = ((localR[0]*localR[1]+ng[y][x].contaminated)/(localR[1]+1), localR[1]+1)
+  self.localRs.append(localR)
 
 class grid:
   def __init__(self, x, y, nClusters):
@@ -106,10 +132,12 @@ class grid:
     self.deaths = 0
     self.R = (0, 0)
     self.localRs = []
+    self.contaLoc = []
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
       self.grid[randposy][randposx] = entity(1, proba(0.8), random.randint(1, 80), proba(0.05), proba(0.9))
+      contaLoc.append((randposx, randposy))
   def get_neibhors(self, x, y):
     g = self.grid
     n = []
