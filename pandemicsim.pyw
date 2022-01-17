@@ -170,7 +170,7 @@ def displayManager(population, settings):
     for y in range(population.height):
       for x in range(population.width):
         if population.grid[y][x].state == 2:
-          continue
+          color = (0, 0, 0)
         elif population.grid[y][x].state == 1:
           color = (0, 0, 255)
         else:
