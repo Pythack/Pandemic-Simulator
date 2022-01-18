@@ -50,6 +50,7 @@ class entity:
     self.hasBadHealth = bool(hasBadHealth)
     self.isVaccinated = bool(isVaccinated)
     self.contaminated = 0
+    self.immunity = 0
 
 #def updateRow(self, ng, y):
 #      localR = (0, 0)
@@ -83,6 +84,8 @@ def updateLoc(self, ng, x, y):
       element = self.grid[y][x]
       neibh, alives = self.get_neibhors(x, y)
       for tile, nx, ny in [x for x in neibh if x[0].state == 2]:
+        if self.grid[ny][nx].immunity != 0:
+          continue
         if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
           ng[ny][nx].state = 1
           ng[y][x].contaminated += 1
@@ -94,10 +97,12 @@ def updateLoc(self, ng, x, y):
         self.deaths += 1
         self.contaminated -= 1
         self.contaLoc.remove((x, y))
-      elif proba(0.5):
+      elif proba(0.2):
         ng[y][x].state = 2
         self.contaminated -= 1
         self.contaLoc.remove((x, y))
+        ng[y][x].immunity = 10
+        self.immuLoc.append((x, y))
       localR = (ng[y][x].contaminated, 1)
       self.localRs.append(localR)
 
@@ -112,6 +117,7 @@ class grid:
     self.R = (0, 0)
     self.localRs = []
     self.contaLoc = []
+    self.immuLoc = []
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
@@ -135,6 +141,11 @@ class grid:
     ng = self.grid
     self.localRs = []
     tempContaLoc = copy.deepcopy(self.contaLoc)
+    for x, y in self.immuLoc:
+        element = ng[y][x]
+        element.immunity -= 1
+        if element.immunity == 0:
+            self.immuLoc.remove((x, y))
     for x, y in tempContaLoc:
         #threading.Thread(target=updateLoc, args=[self, ng, x, y], daemon=True).start()
         updateLoc(self, ng, x, y)
