@@ -184,6 +184,11 @@ def writeText(text, font, color, pos, highlighted = False):
     pygame.draw.rect(dis, (75, 75, 75), textRect)
   display.blit(textsurface, textRect)
 
+
+def updateGridToDisplay(grid, gridToDisplay):
+  gridToDisplay = copy.deepcopy(grid.grid)
+
+
 def displayManager(population, settings, gridDisplay):
   dashboardId = 0
   while True:
@@ -221,6 +226,7 @@ def mainloop(gridw, gridh, settings):
     population.update()
     day += 1
     gridToDisplay = copy.deepcopy(population.grid)
+    threading.Thread(target=updateGridToDisplay, args=[population, gridToDisplay], daemon=True).start()
     settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
 
 
