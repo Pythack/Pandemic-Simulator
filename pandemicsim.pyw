@@ -189,17 +189,17 @@ def updateGridToDisplay(grid, gridToDisplay):
   gridToDisplay = copy.deepcopy(grid.grid)
 
 
-def displayManager(population, settings, gridDisplay):
+def displayManager(population, settings):
   dashboardId = 0
   while True:
     display.fill((0, 0, 0))
     for y in range(population.height):
       for x in range(population.width):
-        if gridDisplay[y][x].state == 2:
+        if population.grid[y][x].state == 2:
           color = (0, 0, 0)
-        elif gridDisplay[y][x].state == 1:
+        elif population.grid[y][x].state == 1:
             color = (0, 255, 255)
-        elif gridDisplay[y][x].state == 3:
+        elif population.grid[y][x].state == 3:
             color = (252, 115, 3)
         else:
           color = (255, 0, 255)
@@ -219,14 +219,11 @@ def displayManager(population, settings, gridDisplay):
 def mainloop(gridw, gridh, settings):
   population = grid(gridw, gridh, 20)
   day = 1
-  gridToDisplay = copy.deepcopy(population.grid)
   settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
-  threading.Thread(target=displayManager, args=[population, settings, gridToDisplay], daemon=True).start()
+  threading.Thread(target=displayManager, args=[population, settings], daemon=True).start()
   while True:
     population.update()
     day += 1
-    gridToDisplay = copy.deepcopy(population.grid)
-    threading.Thread(target=updateGridToDisplay, args=[population, gridToDisplay], daemon=True).start()
     settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
 
 
