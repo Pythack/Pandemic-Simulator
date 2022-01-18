@@ -51,6 +51,7 @@ class entity:
     self.isVaccinated = bool(isVaccinated)
     self.contaminated = 0
     self.immunity = 0
+    self.incubate = 0
 
 #def updateRow(self, ng, y):
 #      localR = (0, 0)
@@ -87,11 +88,12 @@ def updateLoc(self, ng, x, y):
         if self.grid[ny][nx].immunity != 0:
           continue
         if proba(maskTransmissionProbas[str(element.masked)][str(self.grid[ny][nx].masked)]):
-          ng[ny][nx].state = 1
+          ng[ny][nx].state = 3
+          ng[ny][nx].incubate = 14
+          self.incubLoc.append((nx, ny))
           ng[y][x].contaminated += 1
           self.contaminated += 1
           self.contaminations += 1
-          self.contaLoc.append((nx, ny))
       if hasToGoPurple(element.age):
         ng[y][x].state = 0
         self.deaths += 1
@@ -101,7 +103,7 @@ def updateLoc(self, ng, x, y):
         ng[y][x].state = 2
         self.contaminated -= 1
         self.contaLoc.remove((x, y))
-        ng[y][x].immunity = 10
+        ng[y][x].immunity = random.randint(8, 12)
         self.immuLoc.append((x, y))
       localR = (ng[y][x].contaminated, 1)
       self.localRs.append(localR)
@@ -118,6 +120,7 @@ class grid:
     self.localRs = []
     self.contaLoc = []
     self.immuLoc = []
+    self.incubLoc = []
     for i in range(nClusters):
       randposx = random.randint(0, x-1)
       randposy = random.randint(0, y-1)
@@ -146,6 +149,13 @@ class grid:
         element.immunity -= 1
         if element.immunity == 0:
             self.immuLoc.remove((x, y))
+    for x, y in self.incubLoc:
+        element = ng[y][x]
+        element.incubate -= 1
+        if element.incubate == 0:
+            element.state = 1
+            self.incubLoc.remove((x, y))
+            self.contaLoc.append((x, y))
     for x, y in tempContaLoc:
         #threading.Thread(target=updateLoc, args=[self, ng, x, y], daemon=True).start()
         updateLoc(self, ng, x, y)
@@ -174,16 +184,18 @@ def writeText(text, font, color, pos, highlighted = False):
     pygame.draw.rect(dis, (75, 75, 75), textRect)
   display.blit(textsurface, textRect)
 
-def displayManager(population, settings):
+def displayManager(population, settings, gridDisplay):
   dashboardId = 0
   while True:
     display.fill((0, 0, 0))
     for y in range(population.height):
       for x in range(population.width):
-        if population.grid[y][x].state == 2:
+        if gridDisplay[y][x].state == 2:
           color = (0, 0, 0)
-        elif population.grid[y][x].state == 1:
-          color = (0, 0, 255)
+        elif gridDisplay[y][x].state == 1:
+            color = (0, 255, 255)
+        elif gridDisplay[y][x].state == 3:
+            color = (252, 115, 3)
         else:
           color = (255, 0, 255)
         tile = pygame.Rect((x)*1, (y)*1, 1, 1)
@@ -202,11 +214,13 @@ def displayManager(population, settings):
 def mainloop(gridw, gridh, settings):
   population = grid(gridw, gridh, 20)
   day = 1
+  gridToDisplay = copy.deepcopy(population.grid)
   settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
-  threading.Thread(target=displayManager, args=[population, settings], daemon=True).start()
+  threading.Thread(target=displayManager, args=[population, settings, gridToDisplay], daemon=True).start()
   while True:
     population.update()
     day += 1
+    gridToDisplay = copy.deepcopy(population.grid)
     settings["stats"] = stats(population.contaminated, population.contaminations, population.deaths, population.R, day)
 
 
